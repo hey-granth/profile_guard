@@ -1,0 +1,6 @@
+{
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false,
+    "description": "No request body required; must be authenticated"
+}
