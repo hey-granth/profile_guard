@@ -38,8 +38,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "profiles",
+    "channels",
+    "core",
     "accounts",
+    "profiles",
+    "matching",
+    "chat",
+    "moderation",
 ]
 
 MIDDLEWARE = [
@@ -77,8 +82,12 @@ WSGI_APPLICATION = "profile_guard.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": Config.DB_NAME,
+        "USER": Config.DB_USER,
+        "PASSWORD": Config.DB_PASSWORD,
+        "HOST": Config.DB_HOST,
+        "PORT": Config.DB_PORT,
     }
 }
 
@@ -124,4 +133,31 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = 'accounts.UserAccount'
+AUTH_USER_MODEL = "accounts.User"
+
+# Channels configuration for WebSocket support
+ASGI_APPLICATION = "profile_guard.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
+# Media files
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+# Clerk configuration
+CLERK_PUBLISHABLE_KEY = Config.CLERK_PUBLISHABLE_KEY
+CLERK_SECRET_KEY = Config.CLERK_SECRET_KEY
+
+# Image similarity threshold for profile verification
+SIMILARITY_THRESHOLD = 0.8
+
+# File upload settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB

@@ -5,48 +5,109 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-
+from django.utils import timezone
+from .models import LoginVerification
+from .services import ClerkService, VerificationService
+from core.utils import base64_to_embedding
 
 User = get_user_model()
 
 
 @csrf_exempt
 @require_POST
-def register_view(request):
-    data = json.loads(request.body)
-    email: str = data.get("email")
-    password: str = data.get("password")
+def clerk_webhook_view(request):
+    """Handle Clerk webhooks for user creation/updates"""
+    try:
+        data = json.loads(request.body)
+        event_type = data.get("type")
 
-    if not email or not password:
-        return JsonResponse({"error": "Email and password are required"}, status=400)
+        if event_type == "user.created":
+            user_data = data.get("data")
+            ClerkService.create_or_update_user(user_data)
 
-    if not password_validation(password):
-        return JsonResponse({"error": "Password must be at least 8 characters long and contain both letters and numbers"}, status=400)
+        elif event_type == "user.updated":
+            user_data = data.get("data")
+            ClerkService.create_or_update_user(user_data)
 
-    if User.objects.filter(email=email).exists():
-        return JsonResponse({"error": "Email already exists"}, status=400)
+        return JsonResponse({"success": True})
 
-    user = User.objects.create_user(email=email, password=password)
-    user.save()
-    return JsonResponse({"message": "User registered successfully"}, status=201)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 
+@login_required
 @csrf_exempt
 @require_POST
-def login_view(request):
-    data = json.loads(request.body)
-    email: str = data.get("email")
-    password: str = data.get("password")
+def login_verification_view(request):
+    """Handle login verification with 3 images"""
+    try:
+        data = json.loads(request.body)
+        images = data.get("images", [])  # Base64 encoded images
 
-    if not email or not password:
-        return JsonResponse({"error": "Email and password are required"}, status=400)
+        if len(images) != 3:
+            return JsonResponse({"error": "Exactly 3 images required"}, status=400)
 
-    user = User.objects.filter(email=email).first()
-    if user and user.check_password(password):
-        login(request, user)
-        return JsonResponse({"message": "Login successful"})
-    return JsonResponse({"error": "Invalid email or password"}, status=400)
+        # Generate embeddings for all images
+        embeddings = []
+        for img_data in images:
+            embedding = base64_to_embedding(img_data)
+            if not embedding:
+                return JsonResponse({"error": "Failed to process images"}, status=400)
+            embeddings.append(embedding)
 
+        # Create login verification record
+        verification = LoginVerification.objects.create(
+            user=request.user,
+            embedding_1=embeddings[0],
+            embedding_2=embeddings[1],
+            embedding_3=embeddings[2],
+            is_verified=True,
+        )
+
+        # Update user's login embeddings
+        request.user.login_embeddings = embeddings
+        request.user.is_verified = True
+        request.user.verification_completed_at = timezone.now()
+        request.user.save()
+
+        return JsonResponse(
+            {
+                "success": True,
+                "verification_id": verification.id,
+                "message": "Login verification completed",
+            }
+        )
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@login_required
+@require_GET
+def user_profile_view(request):
+    """Get current user profile"""
+    try:
+        user = request.user
+        profile_data = {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "gender": user.gender,
+            "age": user.age,
+            "is_verified": user.is_verified,
+            "verification_completed_at": user.verification_completed_at.isoformat()
+            if user.verification_completed_at
+            else None,
+        }
+
+        return JsonResponse({"user": profile_data})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 @login_required
@@ -55,13 +116,3 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return JsonResponse({"message": "Logout successful"})
-
-
-def password_validation(password: str) -> bool:
-    if len(password) < 8:
-        return False
-    if not any(char.isdigit() for char in password):
-        return False
-    if not any(char.isalpha() for char in password):
-        return False
-    return True
