@@ -1,0 +1,567 @@
+openapi: 3.0.0
+info:
+  title: Profile Guard API
+  description: API for the Profile Guard application, a dating app with a focus on user verification and safety.
+  version: 1.0.0
+servers:
+  - url: /api
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        clerk_id:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+        gender:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        is_verified:
+          type: boolean
+        verification_completed_at:
+          type: string
+          format: date-time
+          nullable: true
+    Profile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          $ref: '#/components/schemas/User'
+        bio:
+          type: string
+        location:
+          type: string
+        occupation:
+          type: string
+        education:
+          type: string
+        height:
+          type: integer
+          nullable: true
+        interests:
+          type: string
+        looking_for:
+          type: string
+        is_active:
+          type: boolean
+        is_verified:
+          type: boolean
+    ProfilePhoto:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        profile:
+          $ref: '#/components/schemas/Profile'
+        image:
+          type: string
+          format: uri
+        order:
+          type: integer
+        is_primary:
+          type: boolean
+        is_verified:
+          type: boolean
+    PromptQuestion:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        question:
+          type: string
+        is_active:
+          type: boolean
+        order:
+          type: integer
+    PromptAnswer:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        profile:
+          $ref: '#/components/schemas/Profile'
+        question:
+          $ref: '#/components/schemas/PromptQuestion'
+        answer:
+          type: string
+    Swipe:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        swiper:
+          $ref: '#/components/schemas/User'
+        swiped:
+          $ref: '#/components/schemas/User'
+        action:
+          type: string
+          enum: [like, dislike]
+    Match:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user1:
+          $ref: '#/components/schemas/User'
+        user2:
+          $ref: '#/components/schemas/User'
+        status:
+          type: string
+        matched_at:
+          type: string
+          format: date-time
+    ChatRoom:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        chat_type:
+          type: string
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        match:
+          $ref: '#/components/schemas/Match'
+        is_active:
+          type: boolean
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        chat_room:
+          $ref: '#/components/schemas/ChatRoom'
+        sender:
+          $ref: '#/components/schemas/User'
+        content:
+          type: string
+        is_read:
+          type: boolean
+    Report:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reporter:
+          $ref: '#/components/schemas/User'
+        reported_user:
+          $ref: '#/components/schemas/User'
+        reason:
+          type: string
+        description:
+          type: string
+        is_resolved:
+          type: boolean
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+        resolved_by:
+          $ref: '#/components/schemas/User'
+    BlockedUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        blocker:
+          $ref: '#/components/schemas/User'
+        blocked:
+          $ref: '#/components/schemas/User'
+        reason:
+          type: string
+paths:
+  /accounts/clerk-webhook/:
+    post:
+      summary: Clerk Webhook
+      description: Handles incoming webhooks from Clerk for user creation and updates.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook processed successfully.
+  /accounts/login-verification/:
+    post:
+      summary: Login Verification
+      description: Verifies user login with facial recognition.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Login successful.
+  /accounts/profile/:
+    get:
+      summary: User Profile
+      description: Get the profile of the currently authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+  /accounts/logout/:
+    post:
+      summary: Logout
+      description: Logs out the current user.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful.
+  /profiles/:
+    get:
+      summary: Get Profile
+      description: Get the profile of the currently authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+  /profiles/update/:
+    put:
+      summary: Update Profile
+      description: Update the profile of the currently authenticated user.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+      responses:
+        '200':
+          description: Profile updated successfully.
+  /profiles/upload-photos/:
+    post:
+      summary: Upload Photos
+      description: Upload profile photos.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Photos uploaded successfully.
+  /profiles/prompt-answers/:
+    post:
+      summary: Save Prompt Answers
+      description: Save answers to profile prompts.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PromptAnswer'
+      responses:
+        '200':
+          description: Prompt answers saved successfully.
+  /profiles/questions/:
+    get:
+      summary: Get Prompt Questions
+      description: Get a list of available prompt questions.
+      responses:
+        '200':
+          description: A list of prompt questions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PromptQuestion'
+  /profiles/{user_id}/:
+    get:
+      summary: Get User Profile
+      description: Get the profile of a specific user.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User profile data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+  /matching/swipe/:
+    post:
+      summary: Swipe on a User
+      description: Like or dislike a user.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                swiped_user_id:
+                  type: integer
+                action:
+                  type: string
+                  enum: [like, dislike]
+      responses:
+        '200':
+          description: Swipe recorded successfully.
+  /matching/potential/:
+    get:
+      summary: Potential Matches
+      description: Get a list of potential matches for the current user.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of potential matches.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /matching/matches/:
+    get:
+      summary: Get Matches
+      description: Get a list of the current user's matches.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of matches.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+  /matching/liked/:
+    get:
+      summary: Liked Users
+      description: Get a list of users that the current user has liked.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of liked users.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /chat/send/:
+    post:
+      summary: Send Message
+      description: Send a message to a chat room.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chat_room_id:
+                  type: integer
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Message sent successfully.
+  /chat/rooms/:
+    get:
+      summary: Chat Rooms
+      description: Get a list of the current user's chat rooms.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of chat rooms.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatRoom'
+  /chat/rooms/{chat_room_id}/messages/:
+    get:
+      summary: Chat Messages
+      description: Get the messages from a specific chat room.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: chat_room_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of chat messages.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+  /chat/create-private/:
+    post:
+      summary: Create Private Chat
+      description: Create a private chat with another user.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+      responses:
+        '200':
+          description: Private chat created successfully.
+  /moderation/report/:
+    post:
+      summary: Report User
+      description: Report a user for inappropriate behavior.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reported_user_id:
+                  type: integer
+                reason:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: User reported successfully.
+  /moderation/block/:
+    post:
+      summary: Block User
+      description: Block a user.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                blocked_user_id:
+                  type: integer
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: User blocked successfully.
+  /moderation/unblock/:
+    post:
+      summary: Unblock User
+      description: Unblock a user.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                blocked_user_id:
+                  type: integer
+      responses:
+        '200':
+          description: User unblocked successfully.
+  /moderation/blocked/:
+    get:
+      summary: Blocked Users
+      description: Get a list of users that the current user has blocked.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of blocked users.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BlockedUser'
