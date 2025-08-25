@@ -43,6 +43,10 @@ INSTALLED_APPS = [
     "accounts",
     "profiles",
     "matching",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
     "chat",
     "moderation",
 ]
@@ -55,6 +59,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "profile_guard.urls"
@@ -151,9 +156,11 @@ CHANNEL_LAYERS = {
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Clerk configuration
-CLERK_PUBLISHABLE_KEY = Config.CLERK_PUBLISHABLE_KEY
-CLERK_SECRET_KEY = Config.CLERK_SECRET_KEY
+# # Clerk configuration
+# CLERK_PUBLISHABLE_KEY = Config.CLERK_PUBLISHABLE_KEY
+# CLERK_SECRET_KEY = Config.CLERK_SECRET_KEY
+# CLERK_PEM_PUBLIC_KEY = "YOUR_CLERK_PEM_PUBLIC_KEY"
+
 
 # Image similarity threshold for profile verification
 SIMILARITY_THRESHOLD = 0.8
@@ -161,3 +168,32 @@ SIMILARITY_THRESHOLD = 0.8
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+    # `allauth` specific authentication methods, such as login by email
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        # This 'APP' dictionary contains the credentials.
+        "APP": {
+            "client_id": Config.GOOGLE_CLIENT_ID,
+            "secret": Config.GOOGLE_CLIENT_SECRET,
+            "key": "",  # key is not used for Google OAuth2 authentication
+        },
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+    }
+}
+
+LOGIN_REDIRECT_URL = "/api/auth/callback/success/"
+
+SITE_ID = 1

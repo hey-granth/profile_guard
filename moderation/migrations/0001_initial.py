@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,53 +14,166 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='BanRecord',
+            name="BanRecord",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('reason', models.TextField()),
-                ('is_active', models.BooleanField(default=True)),
-                ('expires_at', models.DateTimeField(blank=True, null=True)),
-                ('banned_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='bans_issued', to=settings.AUTH_USER_MODEL)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ban_records', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("reason", models.TextField()),
+                ("is_active", models.BooleanField(default=True)),
+                ("expires_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "banned_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="bans_issued",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="ban_records",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'indexes': [models.Index(fields=['user', 'is_active'], name='moderation__user_id_890cad_idx'), models.Index(fields=['expires_at'], name='moderation__expires_88405c_idx')],
+                "indexes": [
+                    models.Index(
+                        fields=["user", "is_active"],
+                        name="moderation__user_id_890cad_idx",
+                    ),
+                    models.Index(
+                        fields=["expires_at"], name="moderation__expires_88405c_idx"
+                    ),
+                ],
             },
         ),
         migrations.CreateModel(
-            name='BlockedUser',
+            name="BlockedUser",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('reason', models.CharField(blank=True, max_length=200)),
-                ('blocked', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='blocked_by', to=settings.AUTH_USER_MODEL)),
-                ('blocker', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='blocked_users', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("reason", models.CharField(blank=True, max_length=200)),
+                (
+                    "blocked",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="blocked_by",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "blocker",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="blocked_users",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'indexes': [models.Index(fields=['blocker'], name='moderation__blocker_5c567d_idx'), models.Index(fields=['blocked'], name='moderation__blocked_44af1d_idx')],
-                'unique_together': {('blocker', 'blocked')},
+                "indexes": [
+                    models.Index(
+                        fields=["blocker"], name="moderation__blocker_5c567d_idx"
+                    ),
+                    models.Index(
+                        fields=["blocked"], name="moderation__blocked_44af1d_idx"
+                    ),
+                ],
+                "unique_together": {("blocker", "blocked")},
             },
         ),
         migrations.CreateModel(
-            name='Report',
+            name="Report",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('reason', models.CharField(choices=[('fake_profile', 'Fake Profile'), ('inappropriate_content', 'Inappropriate Content'), ('harassment', 'Harassment'), ('spam', 'Spam'), ('other', 'Other')], max_length=50)),
-                ('description', models.TextField(blank=True)),
-                ('is_resolved', models.BooleanField(default=False)),
-                ('resolved_at', models.DateTimeField(blank=True, null=True)),
-                ('reported_user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reports_received', to=settings.AUTH_USER_MODEL)),
-                ('reporter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reports_made', to=settings.AUTH_USER_MODEL)),
-                ('resolved_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='reports_resolved', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "reason",
+                    models.CharField(
+                        choices=[
+                            ("fake_profile", "Fake Profile"),
+                            ("inappropriate_content", "Inappropriate Content"),
+                            ("harassment", "Harassment"),
+                            ("spam", "Spam"),
+                            ("other", "Other"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("description", models.TextField(blank=True)),
+                ("is_resolved", models.BooleanField(default=False)),
+                ("resolved_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "reported_user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reports_received",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "reporter",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reports_made",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "resolved_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="reports_resolved",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'indexes': [models.Index(fields=['reported_user', 'is_resolved'], name='moderation__reporte_ec00e6_idx'), models.Index(fields=['reporter', 'created_at'], name='moderation__reporte_d53858_idx')],
-                'unique_together': {('reporter', 'reported_user')},
+                "indexes": [
+                    models.Index(
+                        fields=["reported_user", "is_resolved"],
+                        name="moderation__reporte_ec00e6_idx",
+                    ),
+                    models.Index(
+                        fields=["reporter", "created_at"],
+                        name="moderation__reporte_d53858_idx",
+                    ),
+                ],
+                "unique_together": {("reporter", "reported_user")},
             },
         ),
     ]

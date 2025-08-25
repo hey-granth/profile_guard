@@ -16,6 +16,11 @@ class Config:
     DB_HOST: str = getenv("DB_HOST", "localhost")
     DB_PORT: str = getenv("DB_PORT", "5432")
 
-    # Clerk
-    CLERK_PUBLISHABLE_KEY: str = getenv("CLERK_PUBLISHABLE_KEY")
-    CLERK_SECRET_KEY: str = getenv("CLERK_SECRET_KEY")
+    # Google OAuth
+    GOOGLE_CLIENT_ID: str = getenv("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET: str = getenv("GOOGLE_CLIENT_SECRET")
+    GOOGLE_REDIRECT_URI: str = getenv(
+        "GOOGLE_REDIRECT_URI", "http://localhost:8000/accounts/google/callback/"
+    )
+
+    REDIS_URL: str = getenv("REDIS_URL", "redis://localhost:6379/0")

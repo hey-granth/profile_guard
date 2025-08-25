@@ -7,85 +7,158 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('profiles', '0001_initial'),
+        ("profiles", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='PromptQuestion',
+            name="PromptQuestion",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('question', models.CharField(max_length=200)),
-                ('is_active', models.BooleanField(default=True)),
-                ('order', models.PositiveIntegerField(default=0)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("question", models.CharField(max_length=200)),
+                ("is_active", models.BooleanField(default=True)),
+                ("order", models.PositiveIntegerField(default=0)),
             ],
             options={
-                'ordering': ['order', 'created_at'],
+                "ordering": ["order", "created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Profile',
+            name="Profile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('bio', models.TextField(blank=True, max_length=500)),
-                ('location', models.CharField(blank=True, max_length=100)),
-                ('occupation', models.CharField(blank=True, max_length=100)),
-                ('education', models.CharField(blank=True, max_length=100)),
-                ('height', models.IntegerField(blank=True, help_text='Height in cm', null=True)),
-                ('interests', models.TextField(blank=True, help_text='Comma-separated interests')),
-                ('looking_for', models.CharField(blank=True, max_length=200)),
-                ('is_active', models.BooleanField(default=True)),
-                ('is_verified', models.BooleanField(default=False)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='profile', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("bio", models.TextField(blank=True, max_length=500)),
+                ("location", models.CharField(blank=True, max_length=100)),
+                ("occupation", models.CharField(blank=True, max_length=100)),
+                ("education", models.CharField(blank=True, max_length=100)),
+                (
+                    "height",
+                    models.IntegerField(
+                        blank=True, help_text="Height in cm", null=True
+                    ),
+                ),
+                (
+                    "interests",
+                    models.TextField(blank=True, help_text="Comma-separated interests"),
+                ),
+                ("looking_for", models.CharField(blank=True, max_length=200)),
+                ("is_active", models.BooleanField(default=True)),
+                ("is_verified", models.BooleanField(default=False)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="profile",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ProfilePhoto',
+            name="ProfilePhoto",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('embedding', pgvector.django.vector.VectorField(blank=True, dimensions=512, null=True)),
-                ('image', models.ImageField(upload_to='profile_photos/')),
-                ('order', models.PositiveIntegerField(default=0)),
-                ('is_primary', models.BooleanField(default=False)),
-                ('is_verified', models.BooleanField(default=False)),
-                ('profile', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='photos', to='profiles.profile')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "embedding",
+                    pgvector.django.vector.VectorField(
+                        blank=True, dimensions=512, null=True
+                    ),
+                ),
+                ("image", models.ImageField(upload_to="profile_photos/")),
+                ("order", models.PositiveIntegerField(default=0)),
+                ("is_primary", models.BooleanField(default=False)),
+                ("is_verified", models.BooleanField(default=False)),
+                (
+                    "profile",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="photos",
+                        to="profiles.profile",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['order', 'created_at'],
+                "ordering": ["order", "created_at"],
             },
         ),
         migrations.CreateModel(
-            name='PromptAnswer',
+            name="PromptAnswer",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('answer', models.TextField(max_length=300)),
-                ('profile', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='prompt_answers', to='profiles.profile')),
-                ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='profiles.promptquestion')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("answer", models.TextField(max_length=300)),
+                (
+                    "profile",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="prompt_answers",
+                        to="profiles.profile",
+                    ),
+                ),
+                (
+                    "question",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="profiles.promptquestion",
+                    ),
+                ),
             ],
         ),
         migrations.DeleteModel(
-            name='UserProfile',
+            name="UserProfile",
         ),
         migrations.AddIndex(
-            model_name='profilephoto',
-            index=models.Index(fields=['profile', 'order'], name='profiles_pr_profile_b64763_idx'),
+            model_name="profilephoto",
+            index=models.Index(
+                fields=["profile", "order"], name="profiles_pr_profile_b64763_idx"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='promptanswer',
-            unique_together={('profile', 'question')},
+            name="promptanswer",
+            unique_together={("profile", "question")},
         ),
     ]

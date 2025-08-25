@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,34 +14,113 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Match',
+            name="Match",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('active', 'Active'), ('blocked', 'Blocked')], default='active', max_length=20)),
-                ('matched_at', models.DateTimeField(auto_now_add=True)),
-                ('user1', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='matches_as_user1', to=settings.AUTH_USER_MODEL)),
-                ('user2', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='matches_as_user2', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("active", "Active"),
+                            ("blocked", "Blocked"),
+                        ],
+                        default="active",
+                        max_length=20,
+                    ),
+                ),
+                ("matched_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user1",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="matches_as_user1",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "user2",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="matches_as_user2",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'indexes': [models.Index(fields=['user1', 'status'], name='matching_ma_user1_i_58bf32_idx'), models.Index(fields=['user2', 'status'], name='matching_ma_user2_i_516af4_idx')],
-                'unique_together': {('user1', 'user2')},
+                "indexes": [
+                    models.Index(
+                        fields=["user1", "status"],
+                        name="matching_ma_user1_i_58bf32_idx",
+                    ),
+                    models.Index(
+                        fields=["user2", "status"],
+                        name="matching_ma_user2_i_516af4_idx",
+                    ),
+                ],
+                "unique_together": {("user1", "user2")},
             },
         ),
         migrations.CreateModel(
-            name='Swipe',
+            name="Swipe",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('action', models.CharField(choices=[('like', 'Like'), ('dislike', 'Dislike')], max_length=10)),
-                ('swiped', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='swipes_received', to=settings.AUTH_USER_MODEL)),
-                ('swiper', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='swipes_made', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "action",
+                    models.CharField(
+                        choices=[("like", "Like"), ("dislike", "Dislike")],
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "swiped",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="swipes_received",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "swiper",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="swipes_made",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'indexes': [models.Index(fields=['swiper', 'action'], name='matching_sw_swiper__266b89_idx'), models.Index(fields=['swiped', 'action'], name='matching_sw_swiped__fe345c_idx')],
-                'unique_together': {('swiper', 'swiped')},
+                "indexes": [
+                    models.Index(
+                        fields=["swiper", "action"],
+                        name="matching_sw_swiper__266b89_idx",
+                    ),
+                    models.Index(
+                        fields=["swiped", "action"],
+                        name="matching_sw_swiped__fe345c_idx",
+                    ),
+                ],
+                "unique_together": {("swiper", "swiped")},
             },
         ),
     ]
